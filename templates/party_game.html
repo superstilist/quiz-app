@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ party.name }} - Party Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container" id="party-game-root" data-party-id="{{ party.id }}" data-status="{{ game_state.status }}" data-phase="{{ game_state.round_phase }}" data-round="{{ game_state.current_round }}">
+        <header class="topbar">
+            <h1>{{ party.name }} - Quiz</h1>
+            <div class="topbar-actions">
+                {% if current_user %}
+                <div class="user-chip">
+                    <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}" class="avatar-sm">
+                    <span>{{ current_user.username }}</span>
+                </div>
+                {% endif %}
+                <a href="{{ url_for('party_view', party_id=party.id) }}" class="btn btn-small btn-secondary">Back to Party</a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% set game_state = party.game_state %}
+        {% set game_status = game_state.status %}
+        {% set round_phase = game_state.round_phase %}
+        {% set is_owner = party.owner_key == user_key %}
+
+        {% if game_status == 'in_progress' and question %}
+        <section class="party-detail quiz-stage">
+            <h2>Round {{ game_state.current_round + 1 }} / {{ game_state.total_rounds }}</h2>
+            <h2 class="quiz-question-title">{{ question.question }}</h2>
+            {% if question.image %}
+            <img src="{{ url_for('serve_asset', folder=party.game_state.quiz_folder, filename=question.image) }}" alt="Question image" class="question-image">
+            {% elif question.image_url %}
+            <img src="{{ question.image_url }}" alt="Question image URL" class="question-image">
+            {% endif %}
+            <p>Phase: <strong>{{ round_phase }}</strong></p>
+
+                {% if round_phase == 'question' %}
+                <p>Time left: <strong id="round-timer">{{ timer_remaining if timer_remaining is not none else party.settings.question_time_seconds }}</strong>s</p>
+                <p class="muted">Answers: {{ round_answers|length }}/{{ party.members|length }}</p>
+                {% if user_is_member and not current_user_answer %}
+                <div class="answer-options">
+                {% for option in question.options %}
+                <form method="POST" action="{{ url_for('submit_party_answer', party_id=party.id) }}" class="choice-pop">
+                    <button type="submit" name="answer" value="{{ option }}" class="answer-option answer-option-btn">
+                        <span class="choice-text">{{ option }}</span>
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+            {% elif current_user_answer %}
+                <p class="muted">Your answer: <strong>{{ current_user_answer.selected or 'No answer' }}</strong></p>
+                <p class="muted">Your points this round: <strong>{{ current_user_answer.points or 0 }}</strong></p>
+                {% endif %}
+                {% endif %}
+
+            {% if round_phase in ['review', 'finished'] and round_result %}
+            <div class="party-owner-tools">
+                <h3>Round Result</h3>
+                {% if round_phase == 'review' %}
+                <p>Next question in <strong id="review-timer">{{ timer_remaining if timer_remaining is not none else 0 }}</strong>s</p>
+                {% endif %}
+                <p>Correct answer: <strong>{{ round_result.correct_answer }}</strong></p>
+                <p>Total answers: {{ round_result.total_answers }}</p>
+                <div class="results-list">
+                    {% for option, count in round_result.counts.items() %}
+                    <div class="result-item {% if option == round_result.correct_answer %}correct{% else %}incorrect{% endif %}">
+                        <strong class="choice-text">{{ option }}</strong> - {{ count }} vote(s)
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <p class="muted">Results will be shown after the game ends.</p>
+        </section>
+        {% elif game_status == 'finished' %}
+        <section class="party-detail">
+            <h2>Game Finished</h2>
+            {% if round_result %}
+            <p>Last correct answer: <strong>{{ round_result.correct_answer }}</strong></p>
+            {% endif %}
+            <h3 style="margin-top: 12px;">End Game Results (All Players)</h3>
+            <div class="leaderboard">
+                {% for row in leaderboard_rows %}
+                <div class="leader-row finish-pop">
+                    <div class="leader-user">
+                        <span class="rank">#{{ loop.index }}</span>
+                        <span>{{ row.username }}</span>
+                    </div>
+                    <div class="leader-stats">
+                        <span>Points: <strong>{{ row.points_total }}</strong></span>
+                        <span>Correct: {{ row.correct_answers }}</span>
+                        <span>Answered: {{ row.answered_questions }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </section>
+        {% else %}
+        <section class="party-detail">
+            <h2>Game Not Started</h2>
+            <p>Owner can start the game from the party page.</p>
+        </section>
+        {% endif %}
+
+    </div>
+
+    <script>
+        (function() {
+            var root = document.getElementById('party-game-root');
+            if (!root) return;
+            var partyId = root.dataset.partyId;
+            var initial = {
+                status: root.dataset.status,
+                phase: root.dataset.phase,
+                round: root.dataset.round
+            };
+            var timerEl = document.getElementById('round-timer') || document.getElementById('review-timer');
+            if (timerEl) {
+                var remaining = parseInt((timerEl.textContent || '0').trim(), 10);
+                if (!isNaN(remaining)) {
+                    var tick = function() {
+                        if (remaining <= 0) {
+                            timerEl.textContent = '0';
+                            return;
+                        }
+                        remaining -= 1;
+                        timerEl.textContent = String(remaining);
+                        setTimeout(tick, 1000);
+                    };
+                    setTimeout(tick, 1000);
+                }
+            }
+
+            var poll = function() {
+                fetch('/parties/' + encodeURIComponent(partyId) + '/state', { cache: 'no-store' })
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(state) {
+                        if (!state) return;
+                        var changed = String(state.status) !== String(initial.status)
+                            || String(state.round_phase) !== String(initial.phase)
+                            || String(state.current_round) !== String(initial.round);
+                        if (changed) {
+                            window.location.reload();
+                        }
+                    })
+                    .catch(function() {});
+            };
+            setInterval(poll, 1500);
+        })();
+    </script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

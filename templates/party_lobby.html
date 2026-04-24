@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ party.name }} - Lobby</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="topbar">
+            <h1>{{ party.name }} Lobby</h1>
+            <div class="topbar-actions">
+                {% if current_user %}
+                <div class="user-chip">
+                    <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}" class="avatar-sm">
+                    <span>{{ current_user.username }}</span>
+                </div>
+                {% endif %}
+                <a href="{{ url_for('parties') }}" class="btn btn-small btn-secondary">Back to Parties</a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <p class="desc-text">{{ party.description }}</p>
+        <p>Join code: <strong>{{ party.join_code }}</strong> | Owner: <strong>{{ party.owner }}</strong></p>
+        <p>Players: {{ party.members|length }} | Online: {{ online_member_count }}</p>
+
+        <div class="lobby-layout">
+            <section class="lobby-settings">
+                <h2>Party Settings</h2>
+                {% set is_owner = party.owner_key == user_key %}
+                {% set game_status = game_state.status %}
+                {% set round_phase = game_state.round_phase %}
+
+                {% if is_owner %}
+                <form method="POST" action="{{ url_for('update_party_settings', party_id=party.id) }}" id="auto-settings-form">
+                    <div class="form-group">
+                        <label for="question_mode">Question Mode</label>
+                        <select id="question_mode" name="question_mode">
+                            <option value="full" {% if party.settings.question_mode != 'single' %}selected{% endif %}>Full Quiz</option>
+                            <option value="single" {% if party.settings.question_mode == 'single' %}selected{% endif %}>One Question</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="question_time_seconds">Time Per Question (seconds)</label>
+                        <input id="question_time_seconds" class="time-choice-box" name="question_time_seconds" type="number" min="5" max="300" value="{{ party.settings.question_time_seconds or 30 }}">
+                    </div>
+                    <p class="muted" id="settings-status">Settings auto-save on change.</p>
+                </form>
+
+                {% if game_status != 'in_progress' %}
+                <form method="POST" action="{{ url_for('start_party_game', party_id=party.id) }}" style="margin-top: 12px;">
+                    <div class="form-group">
+                        <label for="quiz_folder">Select Quiz</label>
+                        <select id="quiz_folder" name="quiz_folder" required>
+                            <option value="">Choose quiz</option>
+                            {% for quiz in quizzes %}
+                            <option value="{{ quiz.folder }}">{{ quiz.title }} ({{ quiz.questions|length }} questions)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Start</button>
+                </form>
+                {% else %}
+                <p class="muted">Game is running in auto mode. No manual close needed.</p>
+                {% endif %}
+                {% else %}
+                <p class="muted">Only owner can edit settings and start game.</p>
+                {% endif %}
+
+                {% if game_status in ['in_progress', 'finished'] %}
+                <div class="quiz-actions">
+                    <a href="{{ url_for('party_game_view', party_id=party.id) }}" class="btn">Go To Quiz</a>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('leave_party', party_id=party.id) }}" style="margin-top: 12px;">
+                    <button type="submit" class="btn btn-danger btn-small">Leave Party</button>
+                </form>
+            </section>
+
+            <section class="lobby-players">
+                <h2>Players</h2>
+                <div class="player-grid">
+                    {% for member in member_rows %}
+                    <div class="player-card">
+                        <img src="{{ member.avatar_url }}" alt="{{ member.username }}" class="avatar-lg">
+                        <h3>{{ member.username }}</h3>
+                        <p>{{ 'Online' if member.is_online else 'Offline' }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+    </div>
+    <script>
+        (function() {
+            var form = document.getElementById('auto-settings-form');
+            if (!form) return;
+            var status = document.getElementById('settings-status');
+            var timer = null;
+
+            var save = function() {
+                var body = new FormData(form);
+                if (status) status.textContent = 'Saving...';
+                fetch(form.action, {
+                    method: 'POST',
+                    body: body,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('save_failed');
+                        if (status) status.textContent = 'Saved';
+                    })
+                    .catch(function() {
+                        if (status) status.textContent = 'Save failed, retrying on next change';
+                    });
+            };
+
+            var queueSave = function() {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(save, 250);
+            };
+
+            form.addEventListener('change', queueSave);
+            form.addEventListener('input', function(e) {
+                if ((e.target || {}).name === 'question_time_seconds') {
+                    queueSave();
+                }
+            });
+        })();
+    </script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

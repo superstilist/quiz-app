@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quiz Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin - Quiz Management</h1>
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+        <a href="{{ url_for('add_quiz') }}" class="btn">+ Create New Quiz</a>
+        
+        <h2>Existing Quizzes</h2>
+        {% if quizzes %}
+        <div class="quiz-grid">
+            {% for quiz in quizzes %}
+            <div class="quiz-card">
+                <h3>{{ quiz.title }}</h3>
+                {% if quiz.description %}
+                <p>{{ quiz.description }}</p>
+                {% endif %}
+                <p>{{ quiz.questions|length }} questions</p>
+                {% if quiz.created_at %}
+                <p>Created: {{ quiz.created_at[:10] }}</p>
+                {% endif %}
+                <div class="quiz-actions">
+                    <a href="{{ url_for('edit_quiz', folder=quiz.folder) }}" class="btn btn-small">Edit</a>
+                    <form action="{{ url_for('delete_quiz', folder=quiz.folder) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No quizzes yet. Create your first quiz!</p>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
+

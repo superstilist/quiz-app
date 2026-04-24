@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="topbar">
+            <h1>{{ quiz.title }} - Results</h1>
+            <div class="topbar-actions">
+                <a href="{{ url_for('home') }}" class="btn btn-small btn-secondary">Home</a>
+                <a href="{{ url_for('reset_quiz', folder=folder) }}" class="btn btn-small">Try Again</a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="score-display">{{ "%.1f"|format(score) }}%</div>
+        <p>{{ correct_answers }} / {{ total }} correct answers</p>
+
+        <h2>Review Your Answers:</h2>
+        <div class="results-list">
+            {% for ans in answers %}
+            <div class="result-item {% if ans.is_correct %}correct{% else %}incorrect{% endif %}">
+                <strong>Question {{ ans.question_id }}:</strong>
+                {% if ans.is_correct %}
+                Correct! ({{ ans.selected }})
+                {% else %}
+                Incorrect. You chose: {{ ans.selected }}, Correct: {{ ans.correct }}
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
+
+

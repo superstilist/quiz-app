@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="topbar">
+            <h1>Quiz App</h1>
+            <div class="topbar-actions">
+                {% if current_user %}
+                <div class="user-chip">
+                    <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}" class="avatar-sm">
+                    <span>{{ current_user.username }}</span>
+                    <span class="chip-points">GP {{ current_user.global_points }}</span>
+                </div>
+                <a href="{{ url_for('profile') }}" class="btn btn-small btn-secondary">Profile</a>
+                <a href="{{ url_for('parties') }}" class="btn btn-small">Parties</a>
+                <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-small btn-danger">Logout</button>
+                </form>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-small">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-small btn-secondary">Create Account</a>
+                {% endif %}
+                <a href="{{ url_for('admin') }}" class="btn btn-small btn-secondary">Admin</a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <h2>Global Points Leaderboard</h2>
+        {% if top_users %}
+        <div class="leaderboard">
+            {% for user in top_users %}
+            <div class="leader-row">
+                <div class="leader-user">
+                    <span class="rank">#{{ loop.index }}</span>
+                    <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="avatar-sm">
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="leader-stats">
+                    <span>Total: <strong>{{ user.global_points }}</strong></span>
+                    <span>Classic: {{ user.classic_points }}</span>
+                    <span>Party: {{ user.party_points }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No points yet. Finish a quiz or party game to appear here.</p>
+        {% endif %}
+        <p class="muted">Scoring: Classic quiz = +25 correct, -10 wrong. Party = +300 to +600 correct (speed bonus), -150 wrong, -100 no answer.</p>
+
+        <h2>Available Quizzes</h2>
+        {% if quizzes %}
+        <div class="quiz-grid">
+            {% for quiz in quizzes %}
+            <div class="quiz-card">
+                <h3>{{ quiz.title }}</h3>
+                {% if quiz.description %}
+                <p>{{ quiz.description }}</p>
+                {% endif %}
+                <p>{{ quiz.questions|length }} questions</p>
+                {% if quiz.created_at %}
+                <p>Created: {{ quiz.created_at[:10] }}</p>
+                {% endif %}
+                <a href="{{ url_for('quiz', folder=quiz.folder) }}" class="btn btn-small">Start Quiz</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No quizzes yet. Create your first quiz!</p>
+        {% endif %}
+
+        <h2>Recent Parties</h2>
+        {% if parties_preview %}
+        <div class="party-grid">
+            {% for party in parties_preview %}
+            <div class="party-card">
+                <h3>{{ party.name }}</h3>
+                {% if party.description %}
+                <p>{{ party.description }}</p>
+                {% endif %}
+                <p>Created by {{ party.owner }}</p>
+                <p>Join code: <strong>{{ party.join_code }}</strong></p>
+                {% if current_user %}
+                <div class="quiz-actions">
+                    <a href="{{ url_for('party_view', party_id=party.id) }}" class="btn btn-small btn-secondary">Open</a>
+                    <form method="POST" action="{{ url_for('join_party_by_button', party_id=party.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-small">Join</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No parties yet.</p>
+        {% endif %}
+
+        {% if current_user %}
+        <div class="quiz-actions">
+            <a href="{{ url_for('parties') }}" class="btn">Create Party</a>
+            <a href="{{ url_for('parties') }}" class="btn btn-secondary">Join Party</a>
+        </div>
+        {% else %}
+        <p>Log in to create a party.</p>
+        {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
+
+

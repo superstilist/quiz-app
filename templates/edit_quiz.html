@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Ensure radio buttons and their labels feel like normal clickable elements */
+        input[type="radio"] {
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            margin: 0;
+        }
+        .option-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .option-input:hover {
+            background-color: #2d2d2d;
+        }
+        .radio-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Quiz</h1>
+        <a href="{{ url_for('admin') }}" class="btn btn-secondary">Back to Admin</a>
+        
+        <form method="POST" id="quizForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Quiz Title:</label>
+                <input type="text" name="title" id="title" value="{{ quiz.title }}" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea name="description" id="description" rows="3">{{ quiz.description }}</textarea>
+            </div>
+            
+            <h2>Questions</h2>
+            <div id="questionsContainer">
+                {% for question in quiz.questions %}
+                {% set question_index = loop.index %}
+                <div class="question-block" id="question_{{ question_index }}">
+                    <h3>Question {{ question_index }}</h3>
+                    <div class="form-group">
+                        <label>Question Text:</label>
+                        <input type="text" name="question{{ question_index }}" value="{{ question.question }}" required>
+                    </div>
+                    
+                    <label>Correct Answer & Options:</label>
+                    <div class="options-grid" id="options_grid_{{ question_index }}">
+                        {% set ns = namespace(found=false) %}
+                        {% for option in question.options %}
+                        <div class="option-input">
+                            <div class="radio-container">
+                                <input type="radio" 
+                                       name="answer{{ question_index }}" 
+                                       id="q{{ question_index }}o{{ loop.index0 }}" 
+                                       value="{{ loop.index0 }}" 
+                                       {% if not ns.found and question.answer == option %}
+                                           checked 
+                                           {% set ns.found = true %}
+                                       {% endif %} 
+                                       required>
+                            </div>
+                            <input type="text" 
+                                   name="options_{{ question_index }}[]" 
+                                   value="{{ option }}" 
+                                   placeholder="Option {{ loop.index0 + 1 }}" 
+                                   required>
+                            <button type="button" class="btn btn-small btn-danger" onclick="removeOption(this, {{ question_index }})">×</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-small btn-secondary" onclick="addOption({{ question_index }})">+ Add Option</button>
+   
+                    <div class="canvas-container" style="margin-top: 15px; padding: 12px; background: #2d2d2d; border-radius: 6px; border: 1px solid #444;">
+                        <label style="color: #ccc;">Question Image:</label>
+                        {% if question.image %}
+                        <div class="current-image" style="margin-bottom: 10px;">
+                            <img src="{{ url_for('serve_asset', folder=folder, filename=question.image) }}" style="max-width: 150px; border-radius: 4px; display: block;">
+                            <small style="color: #aaa;">Current: {{ question.image }}</small>
+                            <form method="POST" action="{{ url_for('delete_photo', folder=folder, filename=question.image) }}" style="display:inline; margin-left: 10px;">
+                                <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete this image?')">Delete Image</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        <button type="button" class="btn btn-dark" style="background: #444; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 8px;" onclick="document.getElementById('file{{ question_index }}').click()">📁 Upload File</button>
+                        <button type="button" class="btn btn-dark" style="background: #444; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer;" onclick="document.getElementById('url{{ question_index }}').focus()">🔗 Enter URL</button>
+                        <input type="file" id="file{{ question_index }}" name="image{{ question_index }}" accept="image/*" style="display: none; margin-top: 8px;" onchange="previewImage(this, {{ question_index }})">
+                        <input type="text" id="url{{ question_index }}" name="image_url{{ question_index }}" placeholder="https://example.com/image.jpg" value="{{ question.image_url or '' }}" style="width: 100%; padding: 8px; border: 1px solid #555; border-radius: 4px; background: #1a1a1a; color: #eee; margin-top: 8px;">
+                        <div id="preview{{ question_index }}" style="margin-top: 10px;"></div>
+                    </div>
+                    
+                    <div style="text-align: right; margin-top: 15px;">
+                        <button type="button" class="btn btn-small btn-danger" onclick="removeQuestion({{ question_index }})">Delete Question</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="form-actions" style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="addQuestion()">+ Add Question</button>
+                <button type="submit" class="btn btn-primary" style="float: right;">Save All Changes</button>
+            </div>
+            
+            <input type="hidden" name="question_count" id="questionCount" value="{{ quiz.questions|length }}">
+        </form>
+    </div>
+    
+    <script>
+        function addOption(qNum) {
+            const grid = document.getElementById('options_grid_' + qNum);
+            const div = document.createElement('div');
+            div.className = 'option-input';
+            div.innerHTML = `
+                <div class="radio-container">
+                    <input type="radio" name="answer${qNum}" value="" required>
+                </div>
+                <input type="text" name="options_${qNum}[]" placeholder="New Option" required>
+                <button type="button" class="btn btn-small btn-danger" onclick="removeOption(this, ${qNum})">×</button>
+            `;
+            grid.appendChild(div);
+            reindexOptions(qNum);
+        }
+
+        function removeOption(btn, qNum) {
+            btn.parentElement.remove();
+            reindexOptions(qNum);
+        }
+
+        function reindexOptions(qNum) {
+            const grid = document.getElementById('options_grid_' + qNum);
+            if (!grid) return;
+            const options = grid.querySelectorAll('.option-input');
+            options.forEach((opt, idx) => {
+                const radio = opt.querySelector('input[type="radio"]');
+                radio.id = `q${qNum}o${idx}`;
+                radio.value = idx;
+                const text = opt.querySelector('input[type="text"]');
+                text.placeholder = "Option " + (idx + 1);
+            });
+        }
+
+        function addQuestion() {
+            const count = document.querySelectorAll('.question-block').length + 1;
+            const container = document.getElementById('questionsContainer');
+            const div = document.createElement('div');
+            div.className = 'question-block';
+            div.id = 'question_' + count;
+            div.innerHTML = `
+                <h3>Question ${count}</h3>
+                <div class="form-group">
+                    <label>Question Text:</label>
+                    <input type="text" name="question${count}" required>
+                </div>
+                <label>Correct Answer & Options:</label>
+                <div class="options-grid" id="options_grid_${count}">
+                    <div class="option-input">
+                        <div class="radio-container">
+                            <input type="radio" name="answer${count}" id="q${count}o0" value="0" checked required>
+                        </div>
+                        <input type="text" name="options_${count}[]" placeholder="Option 1" required>
+                        <button type="button" class="btn btn-small btn-danger" onclick="removeOption(this, ${count})">×</button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-small btn-secondary" onclick="addOption(${count})">+ Add Option</button>
+                <div class="canvas-container" style="margin-top: 15px; padding: 12px; background: #2d2d2d; border-radius: 6px; border: 1px solid #444;">
+                    <label style="color: #ccc;">Question Image:</label>
+                    <button type="button" class="btn btn-dark" style="background: #444; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 8px;" onclick="document.getElementById('file${count}').click()">📁 Upload File</button>
+                    <button type="button" class="btn btn-dark" style="background: #444; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 4px; cursor: pointer;" onclick="document.getElementById('url${count}').focus()">🔗 Enter URL</button>
+                    <input type="file" id="file${count}" name="image${count}" accept="image/*" style="display: none; margin-top: 8px;" onchange="previewImage(this, ${count})">
+                    <input type="text" id="url${count}" name="image_url${count}" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 8px; border: 1px solid #555; border-radius: 4px; background: #1a1a1a; color: #eee; margin-top: 8px;">
+                    <div id="preview${count}" style="margin-top: 10px;"></div>
+                </div>
+                <div style="text-align: right; margin-top: 15px;">
+                    <button type="button" class="btn btn-small btn-danger" onclick="removeQuestion(${count})">Delete Question</button>
+                </div>
+            `;
+            container.appendChild(div);
+            updateQuestionCount();
+        }
+
+        function removeQuestion(id) {
+            const el = document.getElementById('question_' + id);
+            if (el) {
+                el.remove();
+                renumberQuestions();
+            }
+        }
+
+        function renumberQuestions() {
+            const blocks = document.querySelectorAll('.question-block');
+            blocks.forEach((block, idx) => {
+                const newId = idx + 1;
+                block.id = 'question_' + newId;
+                block.querySelector('h3').innerText = 'Question ' + newId;
+                block.querySelector('input[name^="question"]').name = 'question' + newId;
+                
+                const fileInput = block.querySelector('input[type="file"]');
+                if (fileInput) fileInput.name = 'image' + newId;
+                
+                const urlInput = block.querySelector('input[name^="image_url"]');
+                if (urlInput) urlInput.name = 'image_url' + newId;
+                
+                const grid = block.querySelector('.options-grid');
+                grid.id = 'options_grid_' + newId;
+                
+                block.querySelector('button[onclick^="addOption"]').setAttribute('onclick', `addOption(${newId})`);
+                block.querySelector('button[onclick^="removeQuestion"]').setAttribute('onclick', `removeQuestion(${newId})`);
+                
+                block.querySelectorAll('.option-input').forEach((opt, optIdx) => {
+                    const radio = opt.querySelector('input[type="radio"]');
+                    radio.name = 'answer' + newId;
+                    radio.id = `q${newId}o${optIdx}`;
+                    radio.value = optIdx;
+                    opt.querySelector('input[type="text"]').name = 'options_' + newId + '[]';
+                    opt.querySelector('button[onclick^="removeOption"]').setAttribute('onclick', `removeOption(this, ${newId})`);
+                });
+            });
+            updateQuestionCount();
+        }
+
+        function updateQuestionCount() {
+            document.getElementById('questionCount').value = document.querySelectorAll('.question-block').length;
+        }
+
+        function previewImage(input, qNum) {
+            const preview = document.getElementById('preview' + qNum);
+            preview.innerHTML = '';
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <div style="position: relative; display: inline-block; margin-top: 10px;">
+                            <img src="${e.target.result}" style="max-width: 150px; border-radius: 4px; display: block;">
+                            <small style="color: #aaa; display: block;">Selected: ${input.files[0].name}</small>
+                            <button type="button" class="btn btn-small btn-danger" style="margin-top: 5px;" onclick="clearFile(${qNum})">✕ Clear File</button>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearFile(qNum) {
+            const fileInput = document.getElementById('file' + qNum);
+            fileInput.value = '';
+            document.getElementById('preview' + qNum).innerHTML = '';
+        }
+
+        // Initial reindex for safety
+        {% for question in quiz.questions %}
+        reindexOptions({{ loop.index }});
+        {% endfor %}
+    </script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
+
+

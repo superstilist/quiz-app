@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parties</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="topbar">
+            <h1>Parties</h1>
+            <div class="topbar-actions">
+                {% if current_user %}
+                <div class="user-chip">
+                    <img src="{{ current_user.avatar_url }}" alt="{{ current_user.username }}" class="avatar-sm">
+                    <span>{{ current_user.username }}</span>
+                </div>
+                {% endif %}
+                <a href="{{ url_for('home') }}" class="btn btn-small btn-secondary">Back to Home</a>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="party-layout">
+            <section class="party-create">
+                <h2>Create Party</h2>
+                <form method="POST" action="{{ url_for('create_party') }}">
+                    <div class="form-group">
+                        <label for="name">Party Name</label>
+                        <input type="text" name="name" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea name="description" id="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Create Party</button>
+                </form>
+
+                <h2 style="margin-top: 18px;">Join Party</h2>
+                <form method="POST" action="{{ url_for('join_party_by_code') }}">
+                    <div class="form-group">
+                        <label for="join_code">Join Code</label>
+                        <input type="text" name="join_code" id="join_code" maxlength="6" placeholder="ABC123" required>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Join by Code</button>
+                </form>
+            </section>
+
+            <section class="party-list">
+                <h2>All Parties</h2>
+                {% if parties %}
+                <div class="party-grid">
+                    {% for party in parties %}
+                    {% set already_member = party.members | selectattr('user_key', 'equalto', user_key) | list | length > 0 %}
+                    <div class="party-card">
+                        <h3>{{ party.name }}</h3>
+                        {% if party.description %}
+                        <p class="desc-text">{{ party.description }}</p>
+                        {% endif %}
+                        <p>Owner: {{ party.owner }}</p>
+                        <p>Members: {{ party.members|length }}</p>
+                        <p>Online: {{ (party_online_counts or {}).get(party.id, 0) }}</p>
+                        <p>Join code: <strong>{{ party.join_code }}</strong></p>
+                        <div class="quiz-actions">
+                            {% if already_member %}
+                            <a href="{{ url_for('party_view', party_id=party.id) }}" class="btn btn-small btn-secondary">Open Lobby</a>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('join_party_by_button', party_id=party.id) }}">
+                                <button type="submit" class="btn btn-small">Join</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No parties yet. Create the first one.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>
