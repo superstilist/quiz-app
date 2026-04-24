@@ -1,0 +1,15 @@
+{
+  "title": "Food",
+  "description": "World cuisine, ingredients, and cooking basics.",
+  "questions": [
+    {"id": 1, "question": "Which country is sushi most associated with?", "options": ["China", "Japan", "Korea", "Thailand"], "answer": "Japan", "image": null, "image_url": null},
+    {"id": 2, "question": "What ingredient is used to make guacamole?", "options": ["Avocado", "Potato", "Spinach", "Peas"], "answer": "Avocado", "image": null, "image_url": null},
+    {"id": 3, "question": "Mozzarella is a type of what?", "options": ["Bread", "Cheese", "Pasta", "Sauce"], "answer": "Cheese", "image": null, "image_url": null},
+    {"id": 4, "question": "Which spice is known for yellow color in curry?", "options": ["Turmeric", "Paprika", "Cinnamon", "Nutmeg"], "answer": "Turmeric", "image": null, "image_url": null},
+    {"id": 5, "question": "What is the main ingredient in hummus?", "options": ["Lentils", "Chickpeas", "Beans", "Peanuts"], "answer": "Chickpeas", "image": null, "image_url": null},
+    {"id": 6, "question": "Which cooking method uses dry heat in an oven?", "options": ["Boiling", "Steaming", "Baking", "Poaching"], "answer": "Baking", "image": null, "image_url": null},
+    {"id": 7, "question": "Pesto traditionally contains basil and which nut?", "options": ["Almond", "Peanut", "Pine nut", "Cashew"], "answer": "Pine nut", "image": null, "image_url": null},
+    {"id": 8, "question": "What is tofu primarily made from?", "options": ["Milk", "Soybeans", "Rice", "Wheat"], "answer": "Soybeans", "image": null, "image_url": null}
+  ],
+  "created_at": "2026-04-17T12:00:00"
+}

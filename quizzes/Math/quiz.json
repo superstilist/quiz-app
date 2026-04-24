@@ -1,0 +1,15 @@
+{
+  "title": "Math",
+  "description": "Arithmetic, algebra, and number sense.",
+  "questions": [
+    {"id": 1, "question": "What is 18 + 27?", "options": ["43", "44", "45", "46"], "answer": "45", "image": null, "image_url": null},
+    {"id": 2, "question": "What is 9 * 7?", "options": ["56", "63", "72", "49"], "answer": "63", "image": null, "image_url": null},
+    {"id": 3, "question": "Solve: 4x = 28", "options": ["6", "7", "8", "9"], "answer": "7", "image": null, "image_url": null},
+    {"id": 4, "question": "What is 81 / 9?", "options": ["8", "9", "10", "7"], "answer": "9", "image": null, "image_url": null},
+    {"id": 5, "question": "What is the square root of 144?", "options": ["10", "11", "12", "13"], "answer": "12", "image": null, "image_url": null},
+    {"id": 6, "question": "What is 15% of 200?", "options": ["25", "30", "35", "40"], "answer": "30", "image": null, "image_url": null},
+    {"id": 7, "question": "What is 2^5?", "options": ["16", "24", "32", "64"], "answer": "32", "image": null, "image_url": null},
+    {"id": 8, "question": "Solve: x + 14 = 31", "options": ["15", "16", "17", "18"], "answer": "17", "image": null, "image_url": null}
+  ],
+  "created_at": "2026-04-17T12:00:00"
+}

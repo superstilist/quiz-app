@@ -1,0 +1,15 @@
+{
+  "title": "English",
+  "description": "Grammar, vocabulary, and usage basics.",
+  "questions": [
+    {"id": 1, "question": "Choose the correct sentence.", "options": ["She don't like tea.", "She doesn't like tea.", "She not like tea.", "She isn't like tea."], "answer": "She doesn't like tea.", "image": null, "image_url": null},
+    {"id": 2, "question": "What is the past tense of 'go'?", "options": ["goed", "went", "gone", "going"], "answer": "went", "image": null, "image_url": null},
+    {"id": 3, "question": "Which word is an adjective?", "options": ["quickly", "beauty", "beautiful", "beautify"], "answer": "beautiful", "image": null, "image_url": null},
+    {"id": 4, "question": "Select the synonym of 'happy'.", "options": ["sad", "angry", "joyful", "tired"], "answer": "joyful", "image": null, "image_url": null},
+    {"id": 5, "question": "Choose the correct article: ___ apple", "options": ["a", "an", "the", "no article"], "answer": "an", "image": null, "image_url": null},
+    {"id": 6, "question": "Which is a proper noun?", "options": ["city", "teacher", "London", "river"], "answer": "London", "image": null, "image_url": null},
+    {"id": 7, "question": "Pick the correct form: They ___ playing now.", "options": ["is", "are", "am", "be"], "answer": "are", "image": null, "image_url": null},
+    {"id": 8, "question": "What punctuation ends a question?", "options": ["Period", "Comma", "Question mark", "Colon"], "answer": "Question mark", "image": null, "image_url": null}
+  ],
+  "created_at": "2026-04-17T12:00:00"
+}

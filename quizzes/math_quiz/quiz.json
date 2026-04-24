@@ -1,0 +1,215 @@
+{
+    "title": "Math Quiz",
+    "description": "Basic to intermediate math quiz",
+    "questions": [
+        {
+            "id": 1,
+            "question": "What is 5 + 7?",
+            "options": [
+                "10",
+                "11",
+                "12",
+                "13"
+            ],
+            "answer": "12",
+            "image": "q1_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 2,
+            "question": "What is 9 * 6?",
+            "options": [
+                "42",
+                "54",
+                "56",
+                "48"
+            ],
+            "answer": "54",
+            "image": "q2_1775838171.png",
+            "image_url": null
+        },
+        {
+            "id": 3,
+            "question": "What is 15 - 8?",
+            "options": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "answer": "7",
+            "image": "q3_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 4,
+            "question": "What is 36 / 6?",
+            "options": [
+                "5",
+                "6",
+                "7",
+                "8"
+            ],
+            "answer": "6",
+            "image": "q4_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 5,
+            "question": "What is 2^3?",
+            "options": [
+                "6",
+                "8",
+                "9",
+                "10"
+            ],
+            "answer": "8",
+            "image": "q5_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 6,
+            "question": "What is the square root of 49?",
+            "options": [
+                "6",
+                "7",
+                "8",
+                "9"
+            ],
+            "answer": "7",
+            "image": "q6_1775838171.png",
+            "image_url": null
+        },
+        {
+            "id": 7,
+            "question": "What is 10% of 200?",
+            "options": [
+                "10",
+                "20",
+                "30",
+                "40"
+            ],
+            "answer": "20",
+            "image": "q7_1775838171.png",
+            "image_url": null
+        },
+        {
+            "id": 8,
+            "question": "Solve: 3x = 12",
+            "options": [
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "answer": "4",
+            "image": "q8_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 9,
+            "question": "What is 7 * 8?",
+            "options": [
+                "54",
+                "56",
+                "58",
+                "60"
+            ],
+            "answer": "56",
+            "image": "q9_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 10,
+            "question": "What is 100 / 4?",
+            "options": [
+                "20",
+                "25",
+                "30",
+                "35"
+            ],
+            "answer": "25",
+            "image": "q10_1775838171.png",
+            "image_url": null
+        },
+        {
+            "id": 11,
+            "question": "What is 11 + 13?",
+            "options": [
+                "22",
+                "23",
+                "24",
+                "25"
+            ],
+            "answer": "24",
+            "image": "q11_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 12,
+            "question": "What is 14 * 2?",
+            "options": [
+                "26",
+                "28",
+                "30",
+                "32"
+            ],
+            "answer": "28",
+            "image": "q12_1775838171.png",
+            "image_url": null
+        },
+        {
+            "id": 13,
+            "question": "What is 81 / 9?",
+            "options": [
+                "7",
+                "8",
+                "9",
+                "10"
+            ],
+            "answer": "9",
+            "image": "q13_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 14,
+            "question": "What is 6^2?",
+            "options": [
+                "12",
+                "24",
+                "36",
+                "48"
+            ],
+            "answer": "36",
+            "image": "q14_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 15,
+            "question": "Solve: x + 5 = 9",
+            "options": [
+                "2",
+                "3",
+                "4",
+                "5"
+            ],
+            "answer": "4",
+            "image": "q15_1775838171.jpg",
+            "image_url": null
+        },
+        {
+            "id": 16,
+            "question": "What is 50% of 80?",
+            "options": [
+                "20",
+                "30",
+                "40",
+                "50"
+            ],
+            "answer": "40",
+            "image": "q16_1775838171.png",
+            "image_url": null
+        }
+    ],
+    "created_at": "2026-04-10T00:00:00"
+}

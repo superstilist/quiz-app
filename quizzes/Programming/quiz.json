@@ -1,0 +1,15 @@
+{
+  "title": "Programming",
+  "description": "Programming basics across languages and concepts.",
+  "questions": [
+    {"id": 1, "question": "Which keyword defines a function in Python?", "options": ["func", "def", "function", "lambda"], "answer": "def", "image": null, "image_url": null},
+    {"id": 2, "question": "What does HTML stand for?", "options": ["Hyper Text Markup Language", "High Transfer Machine Language", "Hyper Tool Multi Language", "Home Tool Markup Language"], "answer": "Hyper Text Markup Language", "image": null, "image_url": null},
+    {"id": 3, "question": "Which data structure uses key-value pairs in Python?", "options": ["List", "Tuple", "Dictionary", "Set"], "answer": "Dictionary", "image": null, "image_url": null},
+    {"id": 4, "question": "What symbol starts a comment in Python?", "options": ["//", "#", "<!--", "--"], "answer": "#", "image": null, "image_url": null},
+    {"id": 5, "question": "Which complexity is typically binary search on sorted data?", "options": ["O(n)", "O(log n)", "O(n log n)", "O(1)"], "answer": "O(log n)", "image": null, "image_url": null},
+    {"id": 6, "question": "In Git, which command creates a commit?", "options": ["git push", "git clone", "git commit", "git status"], "answer": "git commit", "image": null, "image_url": null},
+    {"id": 7, "question": "Which keyword is used for inheritance in many OOP languages?", "options": ["extends", "implements", "inherits", "derive"], "answer": "extends", "image": null, "image_url": null},
+    {"id": 8, "question": "What does API stand for?", "options": ["Application Programming Interface", "Applied Program Internet", "Advanced Process Integration", "Application Process Index"], "answer": "Application Programming Interface", "image": null, "image_url": null}
+  ],
+  "created_at": "2026-04-17T12:00:00"
+}
